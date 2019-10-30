@@ -17,3 +17,40 @@ ut test("AssertValue", "GlobalAssignmentAccess", Expr(
 ut test("AssertValue", "PreventsExpressionDoubleEval", Expr(
 	ut assert value( Expr( 5 + 5 ), Expr( 5 + 5 ) );
 ));
+
+AssertValueTestExpr = ut test case("AssertValueTestExpr")
+	<<Setup(Expr(
+		reporter = ut mock reporter();
+	))
+	<<Teardown(Expr(
+		reporter << Verify Expectations;
+	));
+
+ut test(AssertValueTestExpr, "Shows Literal No Matter Log Benchmark", Expr(
+	// TODO: Don't test this with Mock Reporter...not reliable
+	reporter << Expect Call(Eval Expr(add failure(ut wild, Expr(ut as expr(10)), ut wild, ut wild, ut wild, ut wild)));
+	reporter << Expect Call(Eval Expr(add failure(ut wild, Expr(ut as expr(10)), ut wild, ut wild, ut wild, ut wild)));
+	ut with reporter(reporter, Expr(
+		ut test("A", "a", Expr( ut assert value(10, 20) ), ut log bench(-1));
+		ut test("A", "a", Expr( ut assert value(10, 20) ), ut log bench(0));
+	));
+));
+
+ut test(AssertValueTestExpr, "Shows Expression No Matter Log Benchmark", Expr(
+	reporter << Expect Call(Expr(add failure(ut wild, 5 + 5, ut wild, ut wild, ut wild, ut wild)));
+	reporter << Expect Call(Expr(add failure(ut wild, 5 + 5, ut wild, ut wild, ut wild, ut wild)));
+	ut with reporter(reporter, Expr(
+		ut test("A", "a", Expr( ut assert value(Expr(5 + 5), 20) ), ut log bench(-1));
+		ut test("A", "a", Expr( ut assert value(Expr(5 + 5), 20) ), ut log bench(0));
+		
+	));
+));
+
+ut test(AssertValueTestExpr, "Shows Expression No Matter Log Benchmark With That", Expr(
+	reporter << Expect Call(Expr(add failure(ut wild, 5 + 5, ut wild, ut wild, ut wild, ut wild)));
+	reporter << Expect Call(Expr(add failure(ut wild, 5 + 5, ut wild, ut wild, ut wild, ut wild)));
+	ut with reporter(reporter, Expr(
+		ut test("A", "a", Expr( ut assert that(Expr(5 + 5), 20) ), ut log bench(-1));
+		ut test("A", "a", Expr( ut assert that(Expr(5 + 5), 20) ), ut log bench(0));
+	));
+));
